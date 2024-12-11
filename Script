@@ -1,0 +1,98 @@
+"""
+PROGRAMA: DATA-BOOK GHOST.
+AUTOR: LUCAS MÁRCIO CHAVES GOMES (Ghost).
+DATA: 22/12/2023.
+
+\\ CRIADO EM PRO DE FACILITAR O TRABALHO DE ORGANIZAÇÃO DE ARQUIVOS
+USANDO SISTEMA, SUBSISTEMA, FASE E DICIPLANA.
+
+"""
+
+import os
+from tkinter.filedialog import askdirectory
+import shutil
+
+
+def criar_pastas_com_prefixo(pasta_origem):
+    for nome_arquivo in os.listdir(pasta_origem):
+        caminho_arquivo_origem = os.path.join(pasta_origem, nome_arquivo)
+
+        if os.path.isfile(caminho_arquivo_origem):
+            # Extrai os 4 primeiros caracteres do nome do arquivo como prefixo
+            prefixo_4 = nome_arquivo[:4]
+            # Extrai os 9 primeiros caracteres do nome do arquivo como prefixo
+            prefixo_9 = nome_arquivo[:9]
+
+            # Encontra a primeira palavra após os 9 primeiros caracteres
+            restante_nome = nome_arquivo[9:]
+            primeira_palavra = restante_nome.split(' ', 1)[0]
+
+            # Remove caracteres inválidos de uma pasta
+            prefixo_4 = ''.join(caracter for caracter in prefixo_4 if caracter.isalnum())
+            prefixo_9 = ''.join(caracter for caracter in prefixo_9 if caracter.isalnum())
+            primeira_palavra = ''.join(caracter for caracter in primeira_palavra if caracter.isalnum())
+
+            # Adiciona um hífen após os 4 primeiros caracteres na segunda pasta
+            prefixo_9_com_hifen = f"{prefixo_4}-{prefixo_9[4:]}"
+
+            # Cria a primeira pasta com o prefixo_4 se ainda não existir
+            pasta_destino_1 = os.path.join(pasta_origem, prefixo_4)
+            if not os.path.exists(pasta_destino_1):
+                os.makedirs(pasta_destino_1)
+
+            # Cria a segunda pasta com o prefixo_9_com_hifen dentro da primeira, se ainda não existir
+            pasta_destino_2 = os.path.join(pasta_destino_1, prefixo_9_com_hifen)
+            if not os.path.exists(pasta_destino_2):
+                os.makedirs(pasta_destino_2)
+
+            # Cria a terceira pasta com a primeira palavra após os 9 caracteres, dentro da segunda
+            pasta_destino_3 = os.path.join(pasta_destino_2, primeira_palavra)
+            if not os.path.exists(pasta_destino_3):
+                os.makedirs(pasta_destino_3)
+
+            # Encontra a última palavra no restante do nome do arquivo
+            ultima_palavra = restante_nome.split()[-1]
+
+            # Remove caracteres inválidos da última palavra
+            ultima_palavra = ''.join(caracter for caracter in ultima_palavra if caracter.isalnum())
+
+            # Remove a string "pdf" da última palavra
+            ultima_palavra_sem_pdf = ultima_palavra.replace("pdf", "")
+
+            # Cria a quarta pasta com a última palavra (sem "pdf"), dentro da terceira
+            pasta_destino_4 = os.path.join(pasta_destino_3, ultima_palavra_sem_pdf)
+            if not os.path.exists(pasta_destino_4):
+                os.makedirs(pasta_destino_4)
+
+            # Adiciona uma condição para verificar a palavra na terceira pasta
+            if primeira_palavra == "COM":
+                # Se for "COM", usa a segunda palavra do nome do arquivo
+                segunda_palavra = restante_nome.split(' ', 2)[1]
+                segunda_palavra = ''.join(caracter for caracter in segunda_palavra if caracter.isalnum())
+                pasta_adicional = os.path.join(pasta_destino_4, segunda_palavra)
+                if not os.path.exists(pasta_adicional):
+                    os.makedirs(pasta_adicional)
+                caminho_arquivo_destino = os.path.join(pasta_adicional, nome_arquivo)
+            else:
+                # Se não for "COM", move o arquivo diretamente para a quarta pasta
+                caminho_arquivo_destino = os.path.join(pasta_destino_4, nome_arquivo)
+
+            # Move o arquivo para a pasta de destino
+            shutil.move(caminho_arquivo_origem, caminho_arquivo_destino)
+            print(f"Arquivo {nome_arquivo} movido para {caminho_arquivo_destino}")
+
+            print(f"Pasta {prefixo_4} criada para o arquivo {nome_arquivo}")
+            print(f"Pasta {prefixo_9_com_hifen} criada dentro de {prefixo_4}")
+            print(f"Pasta {primeira_palavra} criada dentro de {prefixo_9_com_hifen}")
+            print(f"Pasta {ultima_palavra_sem_pdf} criada dentro de {primeira_palavra}")
+
+
+if __name__ == "__main__":
+    # Seleção de pasta usando o módulo tkinter
+    pasta_origem = askdirectory(title='Selecione uma pasta')
+
+    if os.path.exists(pasta_origem):
+        criar_pastas_com_prefixo(pasta_origem)
+        print("Criação de pastas e movimentação de arquivos concluída.")
+    else:
+        print("A pasta especificada não existe.")
